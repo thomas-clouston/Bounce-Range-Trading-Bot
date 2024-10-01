@@ -1,6 +1,6 @@
 # Bounce Range Trading Bot
 
-This software trades Futures crypto positions autonomously on the Kucoin exchange. It uses a custom trading stratergy of analysing the average movement against a given coin's trend and makes decisions based on future price action. 
+This software trades Crypto Perpetual Futures Contracts autonomously on the Kucoin exchange. It uses a custom trading stratergy of scanning the exchange for a coin with the most visible linear pattern trend and analyses the average movement against the given coin's trend and makes decisions based on current and future price action. 
 
 ### Usage
 
