@@ -6,4 +6,4 @@ This software currently only supports backtesting functionality for a bot that t
 
 Aquire an api key from the ByBit exchange.
 
-Fill in parameters and run main.py
+Fill in parameters and run process.py
