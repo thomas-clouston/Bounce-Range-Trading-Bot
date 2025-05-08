@@ -15,24 +15,7 @@ def analyse_market(minutes, interval, coin_exclude, backtesting, start_time, end
         api_secret="",
     )
 
-    while True:
-        try:
-            # Lists
-            best_pair = []
-            averages_list = []
-            trends_list = []
-
-            # Finding start time
-            current_date = datetime.today() - timedelta(minutes=minutes)
-            current_date = current_date.strftime("%d.%m.%Y %H:%M:%S")
-            current_date = datetime.strptime(current_date, '%d.%m.%Y %H:%M:%S')
-            seconds = int(current_date.timestamp() * 1000)  # Converting week to milliseconds
-
-            # Finding all available trading pairs
-            pairs = session.get_instruments_info(category="linear")
-            pairs = pairs['result']['list'][::-1]
-
-            # Analysing market
+    # Analysing market
             for index in pairs:
                 trading_pair = index['symbol']
                 if trading_pair != coin_exclude:
@@ -53,8 +36,25 @@ def analyse_market(minutes, interval, coin_exclude, backtesting, start_time, end
                         candle_data_length = len(candle_data)
 
                         trend = ((closing_price - opening_price) / opening_price) * 100
+
+
                         trends_list.append(abs(trend))
                         trends_list.append(trading_pair)
+
+                        if trend > 0:
+                            trend = 'positive'
+                        else:
+                            trend = 'negative'
+
+                        if backtesting == True:
+                            variance = analyse_coin(trading_pair, trend, minutes, interval, clean_threshold, False, backtesting, start_time, end_time)
+                            print(variance)
+                            if variance > variance_threshold:
+                                continue
+                        else:
+                            variance = analyse_coin(trading_pair, trend, minutes, interval, clean_threshold, False, backtesting, None, None)
+                            if variance > variance_threshold:
+                                continue
 
                         gradient = (closing_price - opening_price) / candle_data_length
 
@@ -127,29 +127,4 @@ def analyse_market(minutes, interval, coin_exclude, backtesting, start_time, end
 
     trading_pair = best_pair[0]
 
-    # Deciding position
-    try:
-        if backtesting == True:
-            candle_data = session.get_kline(category="linear", symbol=trading_pair, interval=interval, start=start_time, end=end_time)
-        else:
-            candle_data = session.get_kline(category="linear", symbol=trading_pair, interval=interval, start=seconds)
-        candle_data = candle_data['result']['list'][::-1]
-        closing_price = float(candle_data[-1][4])
-        opening_price = float(candle_data[0][1])
-
-        # Finding trends
-        trend = ((closing_price - opening_price) / opening_price) * 100
-        if trend > 0:
-            trend = 'positive'
-        else:
-            trend = 'negative'
-
-    except Exception:
-        fail_count += 1
-        if fail_count > 10:
-            quit()
-        print('Error in Market analytics:', traceback.format_exc())
-
     return trading_pair, trend
-
-#print(analyse_market(10080, 60, None, False, None, None))
