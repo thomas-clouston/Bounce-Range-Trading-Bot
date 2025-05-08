@@ -103,34 +103,23 @@ def process():
         backtesting_start_time, backtesting_end_time = add_week_and_shift(backtesting_start_time)  # Backtesting start time
         if opened_position == False:
             if backtesting == True:
-                market_analytics = analyse_market(minutes, interval, last_traded_trading_pair, backtesting, backtesting_start_time, backtesting_end_time)
+                market_analytics = analyse_market(minutes, interval, last_traded_trading_pair, backtesting, backtesting_start_time, backtesting_end_time, variance_threshold, clean_threshold)
             else:
-                market_analytics = analyse_market(minutes, interval, last_traded_trading_pair, backtesting, None, None)
+                market_analytics = analyse_market(minutes, interval, last_traded_trading_pair, backtesting, None, None, variance_threshold, clean_threshold)
             trading_pair = market_analytics[0]
             print(f'Trading pair: {trading_pair}')
             trend = market_analytics[1]
+            if trend == 'positive':
+                position = 'Buy'
+            elif trend == 'negative':
+                position = 'Sell'
 
-            if backtesting == True:
-                variance = analyse_coin(trading_pair, trend, minutes, interval, clean_threshold, False, backtesting, backtesting_start_time, backtesting_end_time)
+            if backtesting is True:
+                opened_position, opened_price = open_position(trading_pair, position, backtesting_start_time, backtesting_end_time)
             else:
-                variance = analyse_coin(trading_pair, trend, minutes, interval, clean_threshold, False, backtesting, None, None)
-            print(f'Variance: {variance}')
+                opened_position = open_position(trading_pair, position, None, None)
 
-            if variance == None or variance > variance_threshold:
-                last_traded_trading_pair = trading_pair
-
-            elif variance < variance_threshold:
-                if trend == 'positive':
-                    position = 'Buy'
-                elif trend == 'negative':
-                    position = 'Sell'
-
-                if backtesting is True:
-                    opened_position, opened_price = open_position(trading_pair, position, backtesting_start_time, backtesting_end_time)
-                else:
-                    opened_position = open_position(trading_pair, position, None, None)
-
-                last_traded_trading_pair = trading_pair
+            last_traded_trading_pair = trading_pair
 
 
         else:
